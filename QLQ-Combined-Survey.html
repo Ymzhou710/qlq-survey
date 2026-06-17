@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>肿瘤患者生活质量调查问卷</title>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-light: #eff6ff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --bg: #f8fafc;
+    --white: #ffffff;
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 100px;
+  }
+  .container { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1e40af, #3b82f6);
+    color: white;
+    text-align: center;
+    padding: 24px 16px;
+    border-radius: 0 0 20px 20px;
+    margin-bottom: 20px;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+  .header p { font-size: 13px; opacity: 0.9; }
+  .required-star { color: #ef4444; }
+
+  /* Submit status */
+  .submit-status {
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    margin: 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+  }
+  .submit-status.success { background: #dcfce7; color: #166534; display: block; }
+  .submit-status.error { background: #fee2e2; color: #991b1b; display: block; }
+  .submit-status.loading { background: #eff6ff; color: #1e40af; display: block; }
+
+  /* Sections */
+  .section {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* Form fields */
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+    background: var(--white);
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  }
+
+  /* Question card */
+  .question {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .question:last-child { border-bottom: none; }
+  .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .q-num {
+    display: inline-block;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-right: 6px;
+  }
+
+  /* Radio group */
+  .radio-group {
+    display: flex;
+    gap: 6px;
+  }
+  .radio-item {
+    flex: 1;
+    text-align: center;
+  }
+  .radio-item input { display: none; }
+  .radio-item label {
+    display: block;
+    padding: 10px 4px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-item input:checked + label {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: 600;
+  }
+  .radio-label-sm {
+    display: block;
+    font-size: 10px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  /* 7-point scale */
+  .radio-group-7 {
+    display: flex;
+    gap: 3px;
+  }
+  .radio-group-7 .radio-item label { padding: 10px 2px; font-size: 14px; font-weight: 700; }
+  .scale-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+
+  /* Conditional section */
+  .conditional {
+    border-left: 3px solid var(--warning);
+    background: #fffbeb;
+    padding: 12px 14px;
+    border-radius: 0 10px 10px 0;
+    margin: 12px 0;
+  }
+  .conditional-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 8px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    margin-top: 8px;
+  }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    margin-top: 8px;
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    padding: 8px 0;
+  }
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  .progress-text {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: right;
+    margin-top: 2px;
+  }
+
+  /* Results */
+  .result-card {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .result-card h3 { font-size: 16px; color: #166534; margin-bottom: 10px; }
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 14px;
+  }
+  .score-val { font-weight: 700; font-size: 18px; color: var(--primary); }
+
+  /* Toasts */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    z-index: 999;
+    animation: fadeInOut 2s ease;
+    pointer-events: none;
+  }
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; padding: 0; }
+    .header { background: white !important; color: black !important; border-bottom: 2px solid black; border-radius: 0; }
+    .btn, .progress-wrap, .no-print { display: none !important; }
+    .section { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+    .radio-item input:checked + label {
+      background: white !important;
+      color: black !important;
+      border: 2px solid black !important;
+    }
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-light);
+  }
+  .tab.active {
+    background: var(--primary);
+    color: white;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header no-print">
+    <h1>📋 肿瘤患者生活质量调查</h1>
+    <p>EORTC QLQ-C30 · QLQ-ANL27 · Wexner 评分<br>填写完毕后请点击「提交」上传至医院服务器</p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap no-print" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text" id="progressText">0 / 62 题已完成</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs no-print" id="tabs">
+    <div class="tab active" onclick="scrollToSection('c30')">QLQ-C30</div>
+    <div class="tab" onclick="scrollToSection('anl27')">QLQ-ANL27</div>
+    <div class="tab" onclick="scrollToSection('wexner')">Wexner</div>
+    <div class="tab" onclick="scrollToSection('results')">结果</div>
+  </div>
+
+  <form id="surveyForm">
+
+    <!-- ==================== PATIENT INFO ==================== -->
+    <div class="section" id="sec-patient">
+      <div class="section-title">📝 基本信息</div>
+      <div class="form-group">
+        <label><span class="required-star">*</span> 病历号 / 患者编号</label>
+        <input type="text" id="patientId" placeholder="如：P20240001（必填）" maxlength="30">
+      </div>
+      <div class="form-group">
+        <label>姓名缩写</label>
+        <input type="text" id="initials" placeholder="如：ZS" maxlength="10">
+      </div>
+      <div class="form-group">
+        <label>出生日期</label>
+        <input type="date" id="birthdate">
+      </div>
+      <div class="form-group">
+        <label>填写日期</label>
+        <input type="date" id="filldate">
+      </div>
+    </div>
+
+    <!-- ==================== QLQ-C30 ==================== -->
+    <div class="section" id="sec-c30">
+      <div class="section-title">🔬 EORTC QLQ-C30 (version 3.0)</div>
+      <div class="section-desc">
+        我们关注您及您的健康相关情况。请圈出最适合您的答案，所有信息将严格保密。
+      </div>
+      <div id="c30-questions"></div>
+    </div>
+
+    <!-- ==================== QLQ-ANL27 ==================== -->
+    <div class="section" id="sec-anl27">
+      <div class="section-title">🔬 EORTC QLQ-ANL27</div>
+      <div class="section-desc">
+        请指出在过去一周内您在多大程度上经历了以下症状或问题。
+      </div>
+
+      <!-- Stoma bag question -->
+      <div class="form-group" style="margin-bottom:20px">
+        <label style="font-size:14px">您是否有造口袋（Stoma Bag）？</label>
+        <select id="hasStoma" onchange="toggleStomaQuestions()" style="width:auto; min-width:200px">
+          <option value="">请选择</option>
+          <option value="no">没有</option>
+          <option value="yes">有</option>
+        </select>
+      </div>
+
+      <div id="anl27-questions"></div>
+      <div id="anl27-nostoma" style="display:none"></div>
+      <div id="anl27-yesstoma" style="display:none"></div>
+      <div id="anl27-sexual"></div>
+
+      <!-- Gender -->
+      <div class="form-group" style="margin-top:16px">
+        <label style="font-size:14px">性别</label>
+        <select id="gender" onchange="toggleGenderQuestions()" style="width:auto; min-width:150px">
+          <option value="">请选择</option>
+          <option value="male">男</option>
+          <option value="female">女</option>
+        </select>
+      </div>
+      <div id="anl27-male" style="display:none"></div>
+      <div id="anl27-female" style="display:none"></div>
+    </div>
+
+    <!-- ==================== WEXNER ==================== -->
+    <div class="section" id="sec-wexner">
+      <div class="section-title">📊 Wexner 肛门失禁评分</div>
+      <div class="section-desc">
+        请根据过去一段时间内的实际情况，选择最符合的选项。
+      </div>
+      <div id="wexner-questions"></div>
+    </div>
+
+    <!-- ==================== RESULTS ==================== -->
+    <div class="section no-print" id="sec-results" style="display:none">
+      <div class="section-title">📈 评分结果</div>
+      <div id="results-content"></div>
+      <button type="button" class="btn btn-secondary" onclick="window.print()" style="margin-top:12px">
+        🖨️ 打印结果
+      </button>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-status" id="submitStatus"></div>
+    <button type="button" class="btn btn-primary no-print" id="submitBtn" onclick="handleSubmit()">
+      📤 提交至服务器
+    </button>
+    <button type="button" class="btn btn-outline no-print" onclick="window.print()">
+      🖨️ 直接打印空白问卷
+    </button>
+    <p style="text-align:center;font-size:11px;color:var(--text-light);margin-top:8px" class="no-print">
+      🔒 提交后数据将安全存储于医院本地服务器，不会上传到云端
+    </p>
+  </form>
+</div>
+
+<script>
+// ======================== DATA ========================
+const c30_questions = [
+  "Do you have any trouble doing strenuous activities, like carrying a heavy shopping bag or a suitcase?",
+  "Do you have any trouble taking a long walk?",
+  "Do you have any trouble taking a short walk outside of the house?",
+  "Do you need to stay in bed or a chair during the day?",
+  "Do you need help with eating, dressing, washing yourself or using the toilet?",
+  "Were you limited in doing either your work or other daily activities?",
+  "Were you limited in pursuing your hobbies or other leisure time activities?",
+  "Were you short of breath?",
+  "Have you had pain?",
+  "Did you need to rest?",
+  "Have you had trouble sleeping?",
+  "Have you felt weak?",
+  "Have you lacked appetite?",
+  "Have you felt nauseated?",
+  "Have you vomited?",
+  "Have you been constipated?",
+  "Have you had diarrhea?",
+  "Were you tired?",
+  "Did pain interfere with your daily activities?",
+  "Have you had difficulty in concentrating on things, like reading a newspaper or watching television?",
+  "Did you feel tense?",
+  "Did you worry?",
+  "Did you feel irritable?",
+  "Did you feel depressed?",
+  "Have you had difficulty remembering things?",
+  "Has your physical condition or medical treatment interfered with your family life?",
+  "Has your physical condition or medical treatment interfered with your social activities?",
+  "Has your physical condition or medical treatment caused you financial difficulties?",
+];
+
+const c30_labels_4 = ["没有", "有一点", "较多", "很多"];
+const c30_labels_1_4 = ["1 没有", "2 有一点", "3 较多", "4 很多"];
+
+const anl27_core = [
+  "Have you had leakage of stools or mucus from your anal opening (back passage)?",
+  "Have you experienced frequent bowel movements?",
+  "Have your bowel movements been painful?",
+  "Have you had pain/discomfort around your anal opening (back passage)?",
+  "Have you had pain while sitting?",
+  "Have you been uncomfortable in certain positions (e.g. lying down)?",
+  "Have you had soreness in the areas that have been treated?",
+  "Have you had itchy or irritated skin in the areas that have been treated?",
+  "Have you had to urinate frequently?",
+  "Have you had swelling in your legs or ankles?",
+  "Have you had problems going out of the house because you needed to be close to a toilet?",
+  "Have you had to clean yourself more often?",
+  "Have you had problems planning activities in advance (e.g. meeting friends)?",
+];
+
+const anl27_nostoma = [
+  "Have you had problems with gas (flatulence)?",
+  "When you felt the urge to move your bowels, did you have to hurry to get to the toilet?",
+  "Have you had the feeling of being unable to completely empty your bowels?",
+];
+
+const anl27_yesstoma = [
+  "Have you had sore skin around your stoma?",
+  "Have you had leakage of stools from your stoma bag?",
+  "Have you had unintentional release of gas/flatulence from your stoma bag?",
+];
+
+const anl27_sexual = [
+  "Have you been sexually active?",
+  "To what extent have you been interested in sex?",
+  "Has the disease or treatment affected your sex life (for the worse)?",
+  "Have you had pain during intercourse?",
+];
+
+const anl27_male = [
+  "Have you had difficulty getting or maintaining an erection?",
+];
+
+const anl27_female = [
+  "Has your vagina felt dry?",
+  "Has your vagina felt narrow/tight?",
+  "Has your vagina been painful?",
+];
+
+const wexner_items = [
+  "固体粪便失禁 (Solid)",
+  "液体粪便失禁 (Liquid)",
+  "气体失禁 (Gas)",
+  "需要使用护垫 (Wears pad)",
+  "生活方式改变 (Lifestyle alteration)",
+];
+
+const wexner_labels = ["从不 (0)", "很少 <1次/月 (1)", "有时 <1次/周 (2)", "经常 <1次/天 (3)", "总是 ≥1次/天 (4)"];
+
+// ======================== RENDER ========================
+function makeRadioGroup(name, labels, is7pt) {
+  const cls = is7pt ? 'radio-group-7' : 'radio-group';
+  let html = `<div class="${cls}">`;
+  labels.forEach((lbl, i) => {
+    html += `
+      <div class="radio-item">
+        <input type="radio" name="${name}" id="${name}_${i}" value="${i+1}" onchange="updateProgress()">
+        <label for="${name}_${i}">${i+1}<span class="radio-label-sm">${lbl}</span></label>
+      </div>`;
+  });
+  html += '</div>';
+  if (is7pt) {
+    html += '<div class="scale-ends"><span>很差</span><span>很好</span></div>';
+  }
+  return html;
+}
+
+function makeQuestion(num, text, name, labels, is7pt) {
+  return `
+    <div class="question">
+      <div class="q-text"><span class="q-num">${num}</span>${text}</div>
+      ${makeRadioGroup(name, labels, is7pt)}
+    </div>`;
+}
+
+// Render C30
+let c30html = '';
+c30_questions.forEach((q, i) => {
+  c30html += makeQuestion(i+1, q, `c30_${i+1}`, c30_labels_1_4, false);
+});
+c30html += makeQuestion(29, 'How would you rate your overall health during the past week?', 'c30_29', ['1','2','3','4','5','6','7'], true);
+c30html += makeQuestion(30, 'How would you rate your overall quality of life during the past week?', 'c30_30', ['1','2','3','4','5','6','7'], true);
+document.getElementById('c30-questions').innerHTML = c30html;
+
+// Render ANL27 core (Q31-43)
+let anl27html = '<p style="font-weight:600;font-size:14px;color:#92400e;margin:8px 0">在过去一周内 (During the past week):</p>';
+anl27_core.forEach((q, i) => {
+  anl27html += makeQuestion(31+i, q, `anl27_${31+i}`, c30_labels_1_4, false);
+});
+document.getElementById('anl27-questions').innerHTML = anl27html;
+
+// Render ANL27 no-stoma (Q44-46)
+let nshtml = '<div class="conditional"><div class="conditional-title">⚠️ 仅当您<b>没有</b>造口袋时回答 (Q44-46)：</div>';
+anl27_nostoma.forEach((q, i) => {
+  nshtml += makeQuestion(44+i, q, `anl27_${44+i}`, c30_labels_1_4, false);
+});
+nshtml += '</div>';
+document.getElementById('anl27-nostoma').innerHTML = nshtml;
+
+// Render ANL27 yes-stoma (Q47-49)
+let yshtml = '<div class="conditional"><div class="conditional-title">⚠️ 仅当您<b>有</b>造口袋时回答 (Q47-49)：</div>';
+anl27_yesstoma.forEach((q, i) => {
+  yshtml += makeQuestion(47+i, q, `anl27_${47+i}`, c30_labels_1_4, false);
+});
+yshtml += '</div>';
+document.getElementById('anl27-yesstoma').innerHTML = yshtml;
+
+// Render ANL27 sexual (Q50-53) - past 4 weeks
+let sxhtml = '<p style="font-weight:600;font-size:14px;color:#92400e;margin:12px 0 8px 0">在过去 4 周内 (During the past 4 weeks):</p>';
+anl27_sexual.forEach((q, i) => {
+  sxhtml += makeQuestion(50+i, q, `anl27_${50+i}`, c30_labels_1_4, false);
+});
+document.getElementById('anl27-sexual').innerHTML = sxhtml;
+
+// Render ANL27 male (Q54)
+let mhtml = '<div class="conditional"><div class="conditional-title">♂️ 仅限男性回答 (Q54)：</div>';
+anl27_male.forEach((q, i) => {
+  mhtml += makeQuestion(54+i, q, `anl27_${54+i}`, c30_labels_1_4, false);
+});
+mhtml += '</div>';
+document.getElementById('anl27-male').innerHTML = mhtml;
+
+// Render ANL27 female (Q55-57)
+let fhtml = '<div class="conditional"><div class="conditional-title">♀️ 仅限女性回答（适用于性活动或使用阴道扩张器）(Q55-57)：</div>';
+anl27_female.forEach((q, i) => {
+  fhtml += makeQuestion(55+i, q, `anl27_${55+i}`, c30_labels_1_4, false);
+});
+fhtml += '</div>';
+document.getElementById('anl27-female').innerHTML = fhtml;
+
+// Render Wexner
+let whtml = '';
+wexner_items.forEach((item, i) => {
+  whtml += makeQuestion(i+1, item, `wexner_${i+1}`, wexner_labels, false);
+});
+document.getElementById('wexner-questions').innerHTML = whtml;
+
+// ======================== CONDITIONAL LOGIC ========================
+function toggleStomaQuestions() {
+  const val = document.getElementById('hasStoma').value;
+  document.getElementById('anl27-nostoma').style.display = val === 'no' ? 'block' : 'none';
+  document.getElementById('anl27-yesstoma').style.display = val === 'yes' ? 'block' : 'none';
+  // Clear opposite questions
+  if (val === 'no') clearRadios(/^anl27_(47|48|49)$/);
+  if (val === 'yes') clearRadios(/^anl27_(44|45|46)$/);
+  updateProgress();
+}
+
+function toggleGenderQuestions() {
+  const val = document.getElementById('gender').value;
+  document.getElementById('anl27-male').style.display = val === 'male' ? 'block' : 'none';
+  document.getElementById('anl27-female').style.display = val === 'female' ? 'block' : 'none';
+  if (val === 'male') clearRadios(/^anl27_(55|56|57)$/);
+  if (val === 'female') clearRadios(/^anl27_54$/);
+  updateProgress();
+}
+
+function clearRadios(pattern) {
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    if (pattern.test(r.name)) r.checked = false;
+  });
+}
+
+// ======================== PROGRESS ========================
+function getTotalQuestions() {
+  let total = 30; // C30 always
+  // ANL27 core always: 13
+  total += 13;
+  const stoma = document.getElementById('hasStoma').value;
+  if (stoma === 'no') total += 3;
+  else if (stoma === 'yes') total += 3;
+  // Sexual: 4
+  total += 4;
+  const gender = document.getElementById('gender').value;
+  if (gender === 'male') total += 1;
+  else if (gender === 'female') total += 3;
+  // Wexner: 5
+  total += 5;
+  return total;
+}
+
+function countAnswered() {
+  let answered = 0;
+  const checked = new Set();
+  document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+    if (!checked.has(r.name)) { checked.add(r.name); answered++; }
+  });
+  return answered;
+}
+
+function updateProgress() {
+  const total = getTotalQuestions();
+  const done = countAnswered();
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} / ${total} 题已完成 (${pct}%)`;
+}
+
+// Listen to all radio changes
+document.addEventListener('change', function(e) {
+  if (e.target.type === 'radio') updateProgress();
+});
+
+
+// ======================== SCORING HELPERS ========================
+function getVal(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? parseInt(el.value) : null;
+}
+
+function sumVals(names) {
+  return names.reduce((s, n) => { const v = getVal(n); return v !== null ? s + v : s; }, 0);
+}
+
+function countVals(names) {
+  return names.filter(n => getVal(n) !== null).length;
+}
+
+function calculateResults() {
+  // This is the original scoring + display function, kept for client-side display
+  const pfVals = [1,2,3,4,5].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  let pfScore = null;
+  if (pfVals.length > 0) {
+    const avg = pfVals.reduce((a,b) => a+b, 0) / pfVals.length;
+    pfScore = Math.round((1 - (avg - 1) / 3) * 100);
+  }
+
+  const rfVals = [6,7].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  let rfScore = null;
+  if (rfVals.length > 0) {
+    const avg = rfVals.reduce((a,b) => a+b, 0) / rfVals.length;
+    rfScore = Math.round((1 - (avg - 1) / 3) * 100);
+  }
+
+  const qlVals = [29,30].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  let qlScore = null;
+  if (qlVals.length > 0) {
+    const avg = qlVals.reduce((a,b) => a+b, 0) / qlVals.length;
+    qlScore = Math.round(((avg - 1) / 6) * 100);
+  }
+
+  const symptomNames = [];
+  for (let i = 8; i <= 28; i++) symptomNames.push(`c30_${i}`);
+  const symVals = symptomNames.map(n => getVal(n)).filter(v => v !== null);
+  let symScore = null;
+  if (symVals.length > 0) {
+    const avg = symVals.reduce((a,b) => a+b, 0) / symVals.length;
+    symScore = Math.round(((avg - 1) / 3) * 100);
+  }
+
+  const anlNames = [];
+  for (let i = 31; i <= 57; i++) anlNames.push(`anl27_${i}`);
+  const anlVals = anlNames.map(n => getVal(n)).filter(v => v !== null);
+  let anlScore = null;
+  if (anlVals.length > 0) {
+    const avg = anlVals.reduce((a,b) => a+b, 0) / anlVals.length;
+    anlScore = Math.round(((avg - 1) / 3) * 100);
+  }
+
+  const wexVals = [1,2,3,4,5].map(i => getVal(`wexner_${i}`)).filter(v => v !== null);
+  let wexScore = null;
+  if (wexVals.length === 5) {
+    wexScore = wexVals.reduce((a,b) => a+b, 0);
+  }
+
+  let html = '';
+  html += '<div class="result-card"><h3>🔬 EORTC QLQ-C30 评分 (0-100)</h3>';
+  if (pfScore !== null) {
+    const level = pfScore >= 80 ? '✅ 良好' : pfScore >= 60 ? '⚠️ 一般' : '🔴 需关注';
+    html += `<div class="score-row"><span>躯体功能 (Physical)</span><span class="score-val">${pfScore}</span></div>`;
+    html += `<div style="font-size:12px;color:#64748b;text-align:right;margin-top:-6px">${level}（分数越高越好）</div>`;
+  }
+  if (rfScore !== null) {
+    html += `<div class="score-row"><span>角色功能 (Role)</span><span class="score-val">${rfScore}</span></div>`;
+  }
+  if (qlScore !== null) {
+    html += `<div class="score-row"><span>整体健康/生活质量 (Global QoL)</span><span class="score-val">${qlScore}</span></div>`;
+  }
+  if (symScore !== null) {
+    html += `<div class="score-row"><span>症状负担 (Symptoms)</span><span class="score-val">${symScore}</span></div>`;
+    html += '<div style="font-size:12px;color:#64748b;text-align:right;margin-top:-6px">分数越高 = 症状越重</div>';
+  }
+  html += '</div>';
+
+  if (anlScore !== null) {
+    html += '<div class="result-card"><h3>🔬 QLQ-ANL27 症状评分 (0-100)</h3>';
+    html += `<div class="score-row"><span>肛门癌相关症状</span><span class="score-val">${anlScore}</span></div>`;
+    html += '<div style="font-size:12px;color:#64748b;text-align:right;margin-top:-6px">分数越高 = 症状越重</div>';
+    html += '</div>';
+  }
+
+  if (wexScore !== null) {
+    html += '<div class="result-card"><h3>📊 Wexner 肛门失禁评分 (0-20)</h3>';
+    html += `<div class="score-row"><span>总分</span><span class="score-val">${wexScore} / 20</span></div>`;
+    let wexLevel = '';
+    if (wexScore === 0) wexLevel = '✅ 完全正常';
+    else if (wexScore <= 5) wexLevel = '⚠️ 轻度失禁';
+    else if (wexScore <= 10) wexLevel = '⚠️ 中度失禁';
+    else if (wexScore <= 15) wexLevel = '🔴 中重度失禁';
+    else wexLevel = '🔴 重度失禁';
+    html += `<div style="font-size:13px;color:#64748b;text-align:right;margin-top:-6px">${wexLevel}（0=正常, 20=完全失禁）</div>`;
+    html += '</div>';
+  }
+
+  document.getElementById('results-content').innerHTML = html;
+  document.getElementById('sec-results').style.display = 'block';
+  document.getElementById('sec-results').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ======================== SUBMIT TO SERVER ========================
+function handleSubmit() {
+  // Validate patient ID
+  const patientId = document.getElementById('patientId').value.trim();
+  if (!patientId) {
+    showToast('⚠️ 请填写病历号/患者编号');
+    document.getElementById('patientId').focus();
+    document.getElementById('patientId').scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  // Validate all questions answered
+  const totalQ = getTotalQuestions();
+  const answered = countAnswered();
+  if (answered < totalQ) {
+    showToast(`⚠️ 还有 ${totalQ - answered} 题未回答，请完成后提交`);
+    return;
+  }
+
+  // First show results locally
+  calculateResultsLocal();
+
+  // Then submit to server
+  submitToServer();
+}
+
+function calculateResultsLocal() {
+  // Same logic as original calculateResults(), but sets a flag
+  calculateResults();
+}
+
+function getQuestionText(name) {
+  // Try to find question text from the DOM or data arrays
+  const el = document.querySelector(`input[name="${name}"]`);
+  if (!el) return '';
+  // Walk up to the question div and find the q-text
+  const questionDiv = el.closest('.question');
+  if (questionDiv) {
+    const qText = questionDiv.querySelector('.q-text');
+    if (qText) {
+      const numSpan = qText.querySelector('.q-num');
+      let text = qText.textContent || '';
+      if (numSpan) text = text.replace(numSpan.textContent, '').trim();
+      return text;
+    }
+  }
+  return '';
+}
+
+async function submitToServer() {
+  const statusEl = document.getElementById('submitStatus');
+  const submitBtn = document.getElementById('submitBtn');
+
+  statusEl.className = 'submit-status loading';
+  statusEl.textContent = '⏳ 正在提交到服务器...';
+  submitBtn.disabled = true;
+  submitBtn.textContent = '提交中...';
+
+  // Collect all responses
+  const responses = [];
+  document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+    const parts = r.name.split('_');
+    const scale = r.name.startsWith('c30_') ? 'c30' :
+                  r.name.startsWith('anl27_') ? 'anl27' : 'wexner';
+    const num = parseInt(parts[1]);
+    responses.push({
+      scale: scale,
+      number: num,
+      text: getQuestionText(r.name),
+      value: parseInt(r.value)
+    });
+  });
+
+  // Recalculate scores for the payload
+  const c30Scores = calcC30Scores();
+  const anl27Scores = calcANL27Scores();
+  const wexnerScores = calcWexnerScores();
+
+  const payload = {
+    patient: {
+      initials: document.getElementById('initials').value.trim(),
+      birthdate: document.getElementById('birthdate').value,
+      filldate: document.getElementById('filldate').value,
+      has_stoma: document.getElementById('hasStoma').value,
+      gender: document.getElementById('gender').value,
+      patient_id: document.getElementById('patientId').value.trim(),
+    },
+    responses: responses,
+    scores: {
+      ...c30Scores,
+      ...anl27Scores,
+      ...wexnerScores,
+    }
+  };
+
+  try {
+    const resp = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await resp.json();
+
+    if (result.success) {
+      statusEl.className = 'submit-status success';
+      statusEl.textContent = `✅ 提交成功！记录编号: #${result.id}。服务器已保存您的数据。`;
+      submitBtn.textContent = '已提交 ✓';
+    } else {
+      statusEl.className = 'submit-status error';
+      statusEl.textContent = `❌ 提交失败: ${result.error}`;
+      submitBtn.disabled = false;
+      submitBtn.textContent = '📤 重试提交';
+    }
+  } catch (e) {
+    statusEl.className = 'submit-status error';
+    statusEl.textContent = '❌ 无法连接服务器，请确认已连接医院WiFi后重试';
+    submitBtn.disabled = false;
+    submitBtn.textContent = '📤 重试提交';
+  }
+}
+
+// Helper score functions for payload
+function calcC30Scores() {
+  const pfVals = [1,2,3,4,5].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  const rfVals = [6,7].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  const qlVals = [29,30].map(i => getVal(`c30_${i}`)).filter(v => v !== null);
+  const symNames = [];
+  for (let i = 8; i <= 28; i++) symNames.push(`c30_${i}`);
+  const symVals = symNames.map(n => getVal(n)).filter(v => v !== null);
+
+  const scores = {};
+  if (pfVals.length) {
+    const avg = pfVals.reduce((a,b) => a+b, 0) / pfVals.length;
+    scores.c30_physical = Math.round((1 - (avg - 1) / 3) * 100);
+  }
+  if (rfVals.length) {
+    const avg = rfVals.reduce((a,b) => a+b, 0) / rfVals.length;
+    scores.c30_role = Math.round((1 - (avg - 1) / 3) * 100);
+  }
+  if (qlVals.length) {
+    const avg = qlVals.reduce((a,b) => a+b, 0) / qlVals.length;
+    scores.c30_global_qol = Math.round(((avg - 1) / 6) * 100);
+  }
+  if (symVals.length) {
+    const avg = symVals.reduce((a,b) => a+b, 0) / symVals.length;
+    scores.c30_symptoms = Math.round(((avg - 1) / 3) * 100);
+  }
+  return scores;
+}
+
+function calcANL27Scores() {
+  const anlNames = [];
+  for (let i = 31; i <= 57; i++) anlNames.push(`anl27_${i}`);
+  const vals = anlNames.map(n => getVal(n)).filter(v => v !== null);
+  if (vals.length) {
+    const avg = vals.reduce((a,b) => a+b, 0) / vals.length;
+    return { anl27_total: Math.round(((avg - 1) / 3) * 100) };
+  }
+  return {};
+}
+
+function calcWexnerScores() {
+  const vals = [1,2,3,4,5].map(i => getVal(`wexner_${i}`)).filter(v => v !== null);
+  if (vals.length === 5) {
+    return { wexner_total: vals.reduce((a,b) => a+b, 0) };
+  }
+  return {};
+}
+
+// ======================== HELPERS ========================
+function scrollToSection(id) {
+  const el = document.getElementById('sec-' + id) || document.getElementById('sec-results');
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+  // Update tabs
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const tabIdx = {c30:0, anl27:1, wexner:2, results:3};
+  const tabs = document.querySelectorAll('.tab');
+  if (tabs[tabIdx[id]]) tabs[tabIdx[id]].classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2100);
+}
+
+// Init date
+document.getElementById('filldate').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# 数据库文件（含患者数据）
+*.db
+
+# 二维码（每次启动自动生成）
+survey_qrcode.png
+
+# macOS
+.DS_Store
+
+# 原始 PDF 量表（非部署文件）
+*-English.pdf
+Specimen-*.pdf
+Wexner*.pdf
+*.docx
+
+# 旧版服务器
+start_survey_server.py
+
+# 本地工具
+启动问卷.command
+
+# Python
+__pycache__/
+*.pyc

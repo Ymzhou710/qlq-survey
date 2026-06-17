@@ -1,0 +1,21 @@
+# Render.com 一键部署配置
+# 使用方法: 在 Render Dashboard → Blueprint → 连接此仓库
+
+services:
+  - type: web
+    name: qlq-survey
+    env: docker
+    plan: free  # 免费套餐
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: DATA_DIR
+        value: /data
+      # 部署后 Render 会自动分配域名，将其填入下方
+      # - key: BASE_URL
+      #   value: https://qlq-survey.onrender.com/
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1  # 1GB 持久化存储，数据不会丢失
